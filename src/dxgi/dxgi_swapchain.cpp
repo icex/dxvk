@@ -39,6 +39,12 @@ namespace dxvk {
     m_factory->QueryInterface(__uuidof(IDXGIVkMonitorInfo), reinterpret_cast<void**>(&m_monitorInfo));
     
     // Apply initial window mode and fullscreen state
+    if (!m_descFs.Windowed && m_factory->GetOptions()->deferInitialFullscreen) {
+      // Temporary API probes must not change another renderer's window or display mode.
+      m_deferredFullscreen = true;
+      m_descFs.Windowed = TRUE;
+    }
+
     if (!m_descFs.Windowed && FAILED(EnterFullscreenMode(nullptr)))
     {
       Logger::warn("DXGI: EnterFullscreenMode failed. Creating a windowed swapchain instead.");
@@ -351,6 +357,18 @@ namespace dxvk {
 
     if ((m_desc.SwapEffect == DXGI_SWAP_EFFECT_DISCARD || m_desc.SwapEffect == DXGI_SWAP_EFFECT_SEQUENTIAL) && wsi::isMinimized(m_window))
       return DXGI_STATUS_OCCLUDED;
+
+    if (m_factory->GetOptions()->deferInitialFullscreen && !(PresentFlags & DXGI_PRESENT_TEST)) {
+      std::lock_guard<dxvk::recursive_mutex> lock(m_lockWindow);
+      if (m_deferredFullscreen) {
+        m_deferredFullscreen = false;
+        if (FAILED(EnterFullscreenMode(nullptr))) {
+          Logger::warn("DXGI: Deferred fullscreen transition failed. Keeping a windowed swapchain.");
+          m_descFs.Windowed = TRUE;
+        }
+      }
+    }
+
     bool occluded = !m_descFs.Windowed && wsi::isOccluded(m_window) && !wsi::isMinimized(m_window);
 
     auto options = m_factory->GetOptions();
@@ -525,6 +543,9 @@ namespace dxvk {
 
     if (!Fullscreen && pTarget)
       return DXGI_ERROR_INVALID_CALL;
+
+    // Explicit application requests replace the deferred startup request.
+    m_deferredFullscreen = false;
 
     Com<IDXGIOutput1> target;
 

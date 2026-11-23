@@ -507,6 +507,13 @@ namespace dxvk {
     /* D3D9 GAMES                                 */
     /**********************************************/
 
+    /* Lineage II: Purple On probes D3D11 with a temporary fullscreen
+     * swapchain on the game's D3D9 window, without ever presenting. */
+    { R"(\\L2\.bin$)", {{
+      { "dxgi.deferSurfaceCreation",        "True" },
+      { "dxgi.deferInitialFullscreen",      "True" },
+    }} },
+
     /* A Hat in Time                              */
     { R"(\\HatinTimeGame\.exe$)", {{
       { "d3d9.lenientClear",                "True" },

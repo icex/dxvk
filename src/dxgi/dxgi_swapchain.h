@@ -184,6 +184,7 @@ namespace dxvk {
     DXGI_SWAP_CHAIN_FULLSCREEN_DESC m_descFs;
     UINT                            m_presentId;
     bool                            m_ModeChangeInProgress = false;
+    bool                            m_deferredFullscreen = false;
 
     Com<IDXGIVkSwapChain>           m_presenter;
     Com<IDXGIVkSwapChain1>          m_presenter1;

@@ -58,6 +58,9 @@ namespace dxvk {
     /// Enable support for dummy composition swapchains
     bool enableDummyCompositionSwapchain;
 
+    /// Delay an initial fullscreen request until the first real present.
+    bool deferInitialFullscreen;
+
     /// Limit frame rate
     int32_t maxFrameRate;
 

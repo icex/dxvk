@@ -176,6 +176,7 @@ namespace dxvk {
 
     // We don't support dcomp swapchains and some games may rely on them failing on creation
     this->enableDummyCompositionSwapchain = config.getOption<bool>("dxgi.enableDummyCompositionSwapchain", false);
+    this->deferInitialFullscreen = config.getOption<bool>("dxgi.deferInitialFullscreen", false);
 
     // Expose Nvidia GPUs properly if NvAPI is enabled in environment
     this->hideNvidiaGpu = !isNvapiEnabled();
