@@ -185,6 +185,7 @@ namespace dxvk {
     UINT                            m_presentId;
     bool                            m_ModeChangeInProgress = false;
     bool                            m_deferredFullscreen = false;
+    VkExtent2D                      m_fullscreenResizeFrom = {};
 
     Com<IDXGIVkSwapChain>           m_presenter;
     Com<IDXGIVkSwapChain1>          m_presenter1;
@@ -219,6 +220,8 @@ namespace dxvk {
     
     HRESULT RestoreDisplayMode(
             HMONITOR                hMonitor);
+
+    void UpdateFullscreenResolution();
     
     HRESULT GetSampleCount(
             UINT                    Count,
