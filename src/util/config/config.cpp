@@ -292,10 +292,12 @@ namespace dxvk {
     { R"(\\MarySkelter2\.exe$)", {{
       { "d3d11.disableMsaa",                "True" },
     }} },
-    /* Final Fantasy XIV: Uses lots of HVV and    *
-     * also reads some uncached memory.           */
+    /* Final Fantasy XIV: Uses lots of HVV and reads uncached memory.
+     * Keep fullscreen on focus loss instead of restoring the saved small
+     * window, which drops Wine's fullscreen upscaling when using another monitor. */
     { R"(\\ffxiv_dx11\.exe$)", {{
       { "d3d11.cachedDynamicResources",       "vi" },
+      { "dxgi.keepFullscreenOnFocusLoss",   "True" },
     }} },
     /* Final Fantasy XV: VXAO does thousands of   *
      * draw calls with the same UAV bound         */

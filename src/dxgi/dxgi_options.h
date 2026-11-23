@@ -61,6 +61,9 @@ namespace dxvk {
     /// Delay an initial fullscreen request until the first real present.
     bool deferInitialFullscreen;
 
+    /// Keep a non-minimized fullscreen swapchain on foreground focus loss.
+    bool keepFullscreenOnFocusLoss;
+
     /// Limit frame rate
     int32_t maxFrameRate;
 

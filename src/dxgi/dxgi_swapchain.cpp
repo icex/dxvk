@@ -272,7 +272,8 @@ namespace dxvk {
           IDXGIOutput** ppTarget) {
     HRESULT hr = S_OK;
 
-    if (!m_is_d3d12 && !m_descFs.Windowed && wsi::isOccluded(m_window))
+    if (!m_is_d3d12 && !m_descFs.Windowed && wsi::isOccluded(m_window)
+     && (!m_factory->GetOptions()->keepFullscreenOnFocusLoss || wsi::isMinimized(m_window)))
       SetFullscreenState(FALSE, nullptr);
     if (pFullscreen != nullptr)
       *pFullscreen = !m_descFs.Windowed;
@@ -369,9 +370,12 @@ namespace dxvk {
       }
     }
 
-    bool occluded = !m_descFs.Windowed && wsi::isOccluded(m_window) && !wsi::isMinimized(m_window);
-
     auto options = m_factory->GetOptions();
+
+    // Wine can keep presenting fullscreen without owning keyboard focus.
+    // Do not report focus-only occlusion when preserving that presentation.
+    bool focusLost = !m_descFs.Windowed && wsi::isOccluded(m_window) && !wsi::isMinimized(m_window);
+    bool occluded = focusLost && !options->keepFullscreenOnFocusLoss;
 
     if (options->syncInterval >= 0)
       SyncInterval = options->syncInterval;
@@ -384,7 +388,7 @@ namespace dxvk {
     std::lock_guard<dxvk::recursive_mutex> lockWin(m_lockWindow);
     HRESULT hr = S_OK;
 
-    if (!(PresentFlags & DXGI_PRESENT_TEST) && !occluded && !wsi::isMinimized(m_window))
+    if (!(PresentFlags & DXGI_PRESENT_TEST) && !focusLost && !wsi::isMinimized(m_window))
       UpdateFullscreenResolution();
 
     if (wsi::isWindow(m_window) || !m_window) {
