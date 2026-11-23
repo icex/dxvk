@@ -482,6 +482,11 @@ namespace dxvk {
     { R"(\\LEGOLCUR_DX11\.exe$)", {{
       { "d3d11.disableDirectImageMapping",  "True" },
     }} },
+    /* Black Desert: Wine preserves fullscreen on application deactivation.
+     * Do not independently leave it again when DXGI detects foreground loss. */
+    { R"(\\blackdesert64\.exe$)", {{
+      { "dxgi.keepFullscreenOnFocusLoss",   "True" },
+    }} },
     /* Wargame: European Escalation: Broken gamma   *
      * ramp when nvapi is available for some reason */
     { R"(\\Wargame European Escalation\\WarGame\.exe$)", {{
