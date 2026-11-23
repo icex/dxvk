@@ -199,7 +199,14 @@ namespace dxvk {
       this->hideIntelGpu = true;
     }
 
-    this->enableHDR = config.getOption<bool>("dxgi.enableHDR", env::getEnvVar("DXVK_HDR") == "1");
+    const std::string hdr = env::getEnvVar("DXVK_HDR");
+    bool enableHdrDefault = hdr == "1";
+#ifdef _WIN32
+    // Wine reports the active output state; HDR10 also needs surface support.
+    enableHdrDefault |= hdr.empty();
+#endif
+    this->enableHDR = config.getOption<bool>("dxgi.enableHDR", enableHdrDefault)
+                  && env::getEnvVar("DXVK_NO_HDR") != "1";
 
     bool enableUe4Workarounds = config.getOption<bool>("dxgi.enableUe4Workarounds", false);
 
