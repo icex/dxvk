@@ -1101,9 +1101,11 @@ namespace dxvk {
     if (ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709)
       return true;
 
-    // Only expose HDR10 color space if HDR option is enabled
+    // HDR10 requires both the opt-in and an HDR-enabled output.
     if (ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020)
-      return m_factory->GetOptions()->enableHDR && m_presenter->CheckColorSpaceSupport(ColorSpace);
+      return m_factory->GetOptions()->enableHDR
+          && wsi::isHdrEnabled(m_descFs.Windowed ? wsi::getWindowMonitor(m_window) : m_monitor)
+          && m_presenter->CheckColorSpaceSupport(ColorSpace);
 
     return false;
   }

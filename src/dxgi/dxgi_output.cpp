@@ -236,16 +236,11 @@ namespace dxvk {
     pDesc->Rotation              = DXGI_MODE_ROTATION_UNSPECIFIED;
     pDesc->Monitor               = m_monitor;
     pDesc->BitsPerColor          = 10;
-    // This should only return DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020
-    // (HDR) if the user has the HDR setting enabled in Windows.
-    // Games can still punt into HDR mode by using CheckColorSpaceSupport
-    // and SetColorSpace1.
-    //
-    // We have no way of checking the actual Windows colorspace as the
-    // only public method for this *is* DXGI which we are re-implementing.
-    // So we just pick our color space based on the DXVK_HDR env var
-    // and the punting from SetColorSpace1.
+    // DXVK_HDR permits HDR but must not override the output's SDR state.
+    // This also supplies the HDR capability reported through DXVK-NVAPI.
     pDesc->ColorSpace            = m_monitorInfo->CurrentColorSpace();
+    if (pDesc->ColorSpace != DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709 && !wsi::isHdrEnabled(m_monitor))
+      pDesc->ColorSpace = DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709;
     pDesc->RedPrimary[0]         = m_metadata.redPrimary[0];
     pDesc->RedPrimary[1]         = m_metadata.redPrimary[1];
     pDesc->GreenPrimary[0]       = m_metadata.greenPrimary[0];

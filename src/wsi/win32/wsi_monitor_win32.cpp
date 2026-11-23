@@ -7,6 +7,7 @@
 #include "../../util/util_string.h"
 
 #include <cstring>
+#include <cwchar>
 #include <set>
 
 #include <setupapi.h>
@@ -221,6 +222,59 @@ namespace dxvk::wsi {
           HMONITOR         hMonitor,
           WsiMode*         pMode) {
     return retrieveDisplayMode(hMonitor, ENUM_REGISTRY_SETTINGS, pMode);
+  }
+
+  bool Win32WsiDriver::isHdrEnabled(HMONITOR hMonitor) {
+    WCHAR displayName[32];
+    if (!getDisplayName(hMonitor, displayName))
+      return false;
+
+    std::vector<DISPLAYCONFIG_PATH_INFO> paths;
+    std::vector<DISPLAYCONFIG_MODE_INFO> modes;
+    UINT32 pathCount = 0, modeCount = 0;
+    LONG result;
+
+    do {
+      if (::GetDisplayConfigBufferSizes(QDC_ONLY_ACTIVE_PATHS, &pathCount, &modeCount) != ERROR_SUCCESS)
+        return false;
+
+      paths.resize(pathCount);
+      modes.resize(modeCount);
+      result = ::QueryDisplayConfig(QDC_ONLY_ACTIVE_PATHS,
+        &pathCount, paths.data(), &modeCount, modes.data(), nullptr);
+    } while (result == ERROR_INSUFFICIENT_BUFFER);
+
+    if (result != ERROR_SUCCESS)
+      return false;
+
+    bool found = false;
+    for (UINT32 i = 0; i < pathCount; i++) {
+      const auto& path = paths[i];
+      DISPLAYCONFIG_SOURCE_DEVICE_NAME source = { };
+      source.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_SOURCE_NAME;
+      source.header.size = sizeof(source);
+      source.header.adapterId = path.sourceInfo.adapterId;
+      source.header.id = path.sourceInfo.id;
+      if (::DisplayConfigGetDeviceInfo(&source.header) != ERROR_SUCCESS)
+        return false;
+      if (std::wcscmp(source.viewGdiDeviceName, displayName))
+        continue;
+
+      DISPLAYCONFIG_GET_ADVANCED_COLOR_INFO color = { };
+      color.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_ADVANCED_COLOR_INFO;
+      color.header.size = sizeof(color);
+      color.header.adapterId = path.targetInfo.adapterId;
+      color.header.id = path.targetInfo.id;
+      if (::DisplayConfigGetDeviceInfo(&color.header) != ERROR_SUCCESS)
+        return false;
+
+      // A cloned output must be HDR-enabled on every matching target.
+      if (!color.advancedColorSupported || !color.advancedColorEnabled || color.advancedColorForceDisabled)
+        return false;
+      found = true;
+    }
+
+    return found;
   }
 
   static std::wstring getMonitorDevicePath(HMONITOR hMonitor) {

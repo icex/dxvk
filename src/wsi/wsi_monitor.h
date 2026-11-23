@@ -149,4 +149,12 @@ namespace dxvk::wsi {
     */
   WsiEdidData getMonitorEdid(HMONITOR hMonitor);
 
+  /**
+    * \brief Whether HDR is enabled on the monitor
+    *
+    * Win32 queries the active output, falling back to SDR on failure.
+    * Backends without an output HDR query retain their existing opt-in.
+    */
+  bool isHdrEnabled(HMONITOR hMonitor);
+
 }

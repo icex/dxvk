@@ -199,4 +199,8 @@ namespace dxvk::wsi {
     return s_driver->getMonitorEdid(hMonitor);
   }
 
+  bool isHdrEnabled(HMONITOR hMonitor) {
+    return s_driver->isHdrEnabled(hMonitor);
+  }
+
 }
