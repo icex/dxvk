@@ -525,6 +525,10 @@ namespace dxvk {
       { "dxgi.deferInitialFullscreen",      "True" },
     }} },
 
+    /* StarCraft II: avoid GPU hangs with constant buffer streaming. */
+    { R"(\\SC2(_x64)?\.exe$)", {{
+      { "d3d9.deviceLocalConstantBuffers", "False" },
+    }} },
     /* A Hat in Time                              */
     { R"(\\HatinTimeGame\.exe$)", {{
       { "d3d9.lenientClear",                "True" },
