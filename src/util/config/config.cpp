@@ -315,6 +315,10 @@ namespace dxvk {
     { R"(\\AoE2DE_s\.exe$)", {{
       { "d3d11.cachedDynamicResources",        "a" },
     }} },
+    /* Assassin's Creed DX10: keep fullscreen when focus moves away. */
+    { R"(\\AssassinsCreed_Dx10\.exe$)", {{
+      { "dxgi.keepFullscreenOnFocusLoss",   "True" },
+    }} },
     /* Assassin's Creed 3 and 4                   */
     { R"(\\ac(3|4bf)[sm]p\.exe$)", {{
       { "d3d11.cachedDynamicResources",        "a" },
