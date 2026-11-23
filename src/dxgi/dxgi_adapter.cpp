@@ -312,6 +312,12 @@ namespace dxvk {
       pVideoMemoryInfo->AvailableForReservation += memInfo.heaps[i].heapSize / 2;
     }
 
+    const DxgiOptions* options = m_factory->GetOptions();
+    if (MemorySegmentGroup == DXGI_MEMORY_SEGMENT_GROUP_LOCAL
+     && options->maxDeviceMemory > 0)
+      pVideoMemoryInfo->Budget = std::min(
+        pVideoMemoryInfo->Budget, options->maxDeviceMemory);
+
     // We don't implement reservation, but the observable
     // behaviour should match that of Windows drivers
     uint32_t segmentId = uint32_t(MemorySegmentGroup);
